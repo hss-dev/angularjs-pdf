@@ -1,7 +1,7 @@
-/*! Angular-PDF Version: 1.3.0 | Released under an MIT license */
+/*! Angular-PDF Version: 1.3.0.1 | Released under an MIT license */
 (function() {
 
-  'use strict';
+  'use strict'; 
 
   angular.module('pdf', []).directive('ngPdf', [ '$window', function($window) {
     var renderTask = null;
@@ -37,6 +37,9 @@
       link: function(scope, element, attrs) {
         element.css('display', 'block');
         var url = scope.pdfUrl;
+        if (!url){
+            url = attrs.url;
+        }
         var httpHeaders = scope.httpHeaders;
         var pdfDoc = null;
         var pageToDisplay = isFinite(attrs.page) ? parseInt(attrs.page) : 1;
@@ -128,22 +131,25 @@
         scope.fit = function() {
           pageFit = true;
           scope.renderPage(scope.pageToDisplay);
-        }
+        };
 
         scope.changePage = function() {
           scope.renderPage(scope.pageToDisplay);
         };
 
+        scope.degree = 0;      
         scope.rotate = function() {
-          if (canvas.getAttribute('class') === 'rotate0') {
-            canvas.setAttribute('class', 'rotate90');
-          } else if (canvas.getAttribute('class') === 'rotate90') {
-            canvas.setAttribute('class', 'rotate180');
-          } else if (canvas.getAttribute('class') === 'rotate180') {
-            canvas.setAttribute('class', 'rotate270');
+          var rotate = canvas.getAttribute('class');       
+          if (rotate === 'rotate0') {
+            scope.degree = 90;      
+          } else if ( rotate === 'rotate90') {
+            scope.degree = 180;      
+          } else if (rotate  === 'rotate180') {
+            scope.degree = 270;
           } else {
-            canvas.setAttribute('class', 'rotate0');
+            scope.degree = 0;
           }
+          canvas.setAttribute('class', 'rotate'+scope.degree);
         };
 
         function clearCanvas() {
@@ -201,7 +207,7 @@
             if (debug) {
               console.log('pdfUrl value change detected: ', scope.pdfUrl);
             }
-            url = newVal;
+//            url = newVal;
             scope.pageNum = scope.pageToDisplay = pageToDisplay;
             if (pdfLoaderTask) {
                 pdfLoaderTask.destroy().then(function () {
